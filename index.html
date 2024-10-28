@@ -7,6 +7,34 @@
 </head>
 <body>
     <script>
+
+        const apps = [ // name, url
+            ["Discord", "https://discord.com/channels/@me"],
+            ["YouTube", "https://www.youtube.com/"],
+            ["YouTube Music", "https://music.youtube.com/"],
+
+            ["studip", "https://studip.uni-rostock.de"],
+            ["Uni Email", "https://email.uni-rostock.de"],
+            ["Uni lsf", "https://lsf.uni-rostock.de"],
+            ["mail", "https://mail.proton.me/"],
+
+            ["Cloudflare", "https://dash.cloudflare.com/"],
+            ["Groq", "https://groq.com/"],
+            ["Hetzner Console", "https://console.hetzner.cloud/"],
+            ["Wolfram Alpha", "https://www.wolframalpha.com/"],
+            
+
+            ["CardTrader", "https://www.cardtrader.com/"],
+            ["Scryfall", "https://Scryfall.com/"],
+            ["EDHREC", "https://edhrec.com/"],
+            ["Archidekt", "https://archidekt.com/"],
+            ["MTGPrint", "https://mtgprint.net/"],
+
+            ["1337x", "https://1337x.to/"],
+            ["PirateBay", "https://thepiratebay.org/"],
+            ["Reapck Games", "https://repack-games.com/#"]
+        ]
+
         function vpn_is_active() {
             let ip = ""
 
@@ -40,6 +68,11 @@
             }
         }
 
+        function is_url(str) {
+            let url_pattern = new RegExp("^(http|https)://", "i");
+            return url_pattern.test(str);
+        }
+
         function init_search_providers() {
             let search_providers = document.getElementsByClassName("search-provider");
 
@@ -48,8 +81,13 @@
 
                 provider.addEventListener("click", function() {
                     let query = document.getElementById("search").value;
-                    let url = provider.getAttribute("x-url").replace("[QUERY]", query);
                     let is_safe = provider.getAttribute("x-is-safe");
+
+                    let url = provider.getAttribute("x-url").replace("[QUERY]", query);
+                    
+                    if (is_url(query)) {
+                        url = query;
+                    }
 
                     if (!vpn_is_active() && is_safe == "false") {
                         alert("You need to activate your VPN to access this search engine");
@@ -62,7 +100,12 @@
 
             document.getElementById("search_button").addEventListener("click", function() {
                 let query = document.getElementById("search").value;
+
                 let url = search_providers[0].getAttribute("x-url").replace("[QUERY]", query);
+
+                if (is_url(query)) {
+                    url = query;
+                }
 
                 window.location.href = url;
             });
@@ -71,14 +114,67 @@
                 if (event.keyCode === 13) {
                     // enter key
                     let query = document.getElementById("search").value;
+                    
                     let url = search_providers[0].getAttribute("x-url").replace("[QUERY]", query);
 
+                    if (is_url(query)) {
+                        url = query;
+                    }
+
                     window.location.href = url;
+                } else {
+                    update_search_predictions();
                 }
             });
             
             // set the search bar to focus
             document.getElementById("search").focus();
+        }
+
+        async function update_search_predictions() {
+            let query = document.getElementById("search").value;
+
+            let predictions_div = document.getElementById("search-predictions");
+
+            // predictions are made up of up to three apps (if the match the query) and then web results
+
+            let predictions = [];
+
+            for (let i = 0; i < apps.length; i++) {
+                let app = apps[i];
+
+                if (app[0].toLowerCase().includes(query.toLowerCase()) || app[1].toLowerCase().includes(query.toLowerCase())) {
+                    predictions.push(["Open " + app[0], app[1]]);
+                }
+            }
+
+            // add web results
+            var url = "/web_autocomplete?q=" + query;
+
+            let response = await fetch(url);
+            let data = await response.json();
+
+            for (let i = 0; i < data.length; i++) {
+                let prediction = data[i];
+                let phrase = prediction.phrase;
+                predictions.push(["Search for " + phrase, "https://DuckDuckGo.com/?q=" + phrase]);
+            }
+
+            predictions_div.innerHTML = "";
+
+            for (let i = 0; i < predictions.length; i++) {
+                let prediction = predictions[i];
+
+                let prediction_div = document.createElement("div");
+                prediction_div.classList.add("search-prediction");
+                prediction_div.innerHTML = prediction[0];
+                prediction_div.addEventListener("click", function() {
+                    window.location.href = prediction[1];
+                });
+
+                predictions_div.appendChild(prediction_div);
+            }
+
         }
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -89,92 +185,147 @@
     </script>
 
     <style>
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
 
-        htlm, body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: #333;
+  margin-top: 0;
+}
 
-        #vpn_status {
-            position: fixed;
-            top: 0;
-            right: 0;
-            background-color: red;
-            color: white;
-            padding: 10px;
-            display: none;
-        }
+h1 {
+  font-size: 36px;
+}
 
-        #vpn_status.active {
-            display: block;
-        }
+h2 {
+  font-size: 24px;
+}
 
-        #vpn_status.inactive {
-            display: none;
-        }
+h3 {
+  font-size: 18px;
+}
 
-        #search-inputs {
-            position: fixed;
-            left: 50%;
-            top: 10%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-        }
+h4 {
+  font-size: 16px;
+}
 
-        #search {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin-right: 10px;
-            width: 55vw;
-            height: 5vh;
+h5 {
+  font-size: 14px;
+}
 
-            font-size: 1.5em;
-        }
+h6 {
+  font-size: 12px;
+}
 
-        #search_button {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            cursor: pointer;
-            background-color: #f1f1f1;
+a {
+  text-decoration: none;
+  color: #337ab7;
+}
 
-            font-size: 1.5em;
-            height: 100%;
-        }
+a:hover {
+  color: #23527c;
+}
 
-        #search-engines {
-            position: fixed;
-            left: 50%;
-            top: 20%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-        }
+#vpn_status {
+  padding: 20px;
+  background-color: #f7f7f7;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
 
-        .search-provider {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            cursor: pointer;
-            background-color: #f1f1f1;
-            margin-right: 10px;
+#vpn_status.active {
+  background-color: #4CAF50;
+  color: #fff;
+}
 
-            font-size: 1.5em;
-        }
+#vpn_status.inactive {
+  background-color: #ff0000;
+  color: #fff;
+}
 
-        .search-provider:hover {
-            background-color: #e1e1e1;
-        }
+#search-inputs {
+  margin-top: 40px;
+  text-align: center;
+}
 
-        .search-provider[x-is-safe="false"] {
-            background-color: red;
-            color: white;
-        }
+#search-inputs input[type="text"] {
+  padding: 10px;
+  font-size: 16px;
+  width: 45vw;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
+#search-inputs button[type="button"] {
+  padding: 10px;
+  font-size: 16px;
+  width: 15%;
+  height: 40px;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
 
+#search-inputs button[type="button"]:hover {
+  background-color: #3e8e41;
+}
+
+#search-predictions {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+    max-height: 40vh;
+    max-width: 50vw;
+}
+
+.search-prediction {
+  padding: 10px;
+  margin: 10px;
+  background-color: #f7f7f7;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.search-prediction:hover {
+  background-color: #f0f0f0;
+}
+
+#search-engines {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.search-provider {
+  display: inline-block;
+  margin: 10px;
+  padding: 10px;
+  background-color: #f7f7f7;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.search-provider:hover {
+  background-color: #f0f0f0;
+}
 
     </style>
 
@@ -185,6 +336,17 @@
         <input type="text" id="search" placeholder="Search">
         <button id="search_button">Search</button>
     </div>
+
+    <div id="search-predictions">
+        <div class="search-prediction">
+            Prediction 1
+        </div>
+
+        <div class="search-prediction">
+            Prediction 2
+        </div>
+    </div>
+
 
     <div id="search-engines">
 
