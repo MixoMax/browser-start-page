@@ -42,4 +42,4 @@ async def is_vpn(ip: str):
         return {"is_vpn": False}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=80)
