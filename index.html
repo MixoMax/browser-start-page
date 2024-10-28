@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function vpn_is_active() {
+            let ip = ""
+
+            let xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://checkip.amazonaws.com/", false);
+            xhr.send();
+            ip = xhr.responseText;
+
+            xhr.open("GET", "/is_vpn?ip=" + ip, false);
+            xhr.send();
+            let data = JSON.parse(xhr.responseText);
+
+            if (data.is_vpn) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function update_vpn_status() {
+            let status = document.getElementById("vpn_status");
+
+            if (vpn_is_active()) {
+                status.innerHTML = "VPN is active";
+                status.classList.add("active");
+                status.classList.remove("inactive");
+            } else {
+                status.innerHTML = "VPN is inactive";
+                status.classList.add("inactive");
+                status.classList.remove("active");
+            }
+        }
+
+        function init_search_providers() {
+            let search_providers = document.getElementsByClassName("search-provider");
+
+            for (let i = 0; i < search_providers.length; i++) {
+                let provider = search_providers[i];
+
+                provider.addEventListener("click", function() {
+                    let query = document.getElementById("search").value;
+                    let url = provider.getAttribute("x-url").replace("[QUERY]", query);
+                    let is_safe = provider.getAttribute("x-is-safe");
+
+                    if (!vpn_is_active() && is_safe == "false") {
+                        alert("You need to activate your VPN to access this search engine");
+                        return;
+                    }
+
+                    window.location.href = url;
+                });
+            }
+
+            document.getElementById("search_button").addEventListener("click", function() {
+                let query = document.getElementById("search").value;
+                let url = search_providers[0].getAttribute("x-url").replace("[QUERY]", query);
+
+                window.location.href = url;
+            });
+
+            document.getElementById("search").addEventListener("keyup", function(event) {
+                if (event.keyCode === 13) {
+                    // enter key
+                    let query = document.getElementById("search").value;
+                    let url = search_providers[0].getAttribute("x-url").replace("[QUERY]", query);
+
+                    window.location.href = url;
+                }
+            });
+            
+            // set the search bar to focus
+            document.getElementById("search").focus();
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            init_search_providers();
+            update_vpn_status();
+        });
+
+    </script>
+
+    <style>
+
+        htlm, body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #vpn_status {
+            position: fixed;
+            top: 0;
+            right: 0;
+            background-color: red;
+            color: white;
+            padding: 10px;
+            display: none;
+        }
+
+        #vpn_status.active {
+            display: block;
+        }
+
+        #vpn_status.inactive {
+            display: none;
+        }
+
+        #search-inputs {
+            position: fixed;
+            left: 50%;
+            top: 10%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+        }
+
+        #search {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+            width: 55vw;
+            height: 5vh;
+
+            font-size: 1.5em;
+        }
+
+        #search_button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+
+            font-size: 1.5em;
+            height: 100%;
+        }
+
+        #search-engines {
+            position: fixed;
+            left: 50%;
+            top: 20%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+        }
+
+        .search-provider {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            margin-right: 10px;
+
+            font-size: 1.5em;
+        }
+
+        .search-provider:hover {
+            background-color: #e1e1e1;
+        }
+
+        .search-provider[x-is-safe="false"] {
+            background-color: red;
+            color: white;
+        }
+
+
+
+    </style>
+
+    <div id="vpn_status"></div>
+
+
+    <div id="search-inputs">
+        <input type="text" id="search" placeholder="Search">
+        <button id="search_button">Search</button>
+    </div>
+
+    <div id="search-engines">
+
+        <div class="search-provider" id="duckduckgo" x-url="https://duckduckgo.com/?q=[QUERY]" x-is-safe="true">
+            DuckDuckGo
+        </div>
+
+        <div class="search-provider" id="google" x-url="https://www.google.com/search?q=[QUERY]" x-is-safe="true">
+            Google
+        </div>
+
+        <div class="search-provider" id="bing" x-url="https://www.bing.com/search?q=[QUERY]" x-is-safe="true">
+            Bing
+        </div>
+
+        <div class="search-provider" id="the_pirate_bay" x-url="https://thepiratebay.org/search/[QUERY]/0/99/0" x-is-safe="false">
+            The Pirate Bay
+        </div>
+
+
+    </div>
+
+</body>
+</html>
