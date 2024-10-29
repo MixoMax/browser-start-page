@@ -254,7 +254,7 @@
                 prediction_div.setAttribute("x-url", prediction[1]);
 
                 let icon = document.createElement("img");
-                icon.src = "https://www.google.com/s2/favicons?sz=256&domain=" + new URL(prediction[1]).hostname;
+                icon.src = "https://www.google.com/s2/favicons?sz=64&domain=" + new URL(prediction[1]).hostname;
                 icon.classList.add("prediction-icon");
                 prediction_div.prepend(icon);
 
@@ -318,155 +318,170 @@
     </script>
 
     <style>
-body {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #333;
-  background-color: #f9f9f9;
-  margin: 0;
-  padding: 0;
-}
+        body {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        color: #333;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 0;
+        }
 
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  color: #333;
-  margin-top: 0;
-}
+        h1, h2, h3, h4, h5, h6 {
+        font-weight: 700;
+        color: #333;
+        margin-top: 0;
+        }
 
-h1 {
-  font-size: 36px;
-}
+        h1 {
+        font-size: 36px;
+        }
 
-h2 {
-  font-size: 24px;
-}
+        h2 {
+        font-size: 24px;
+        }
 
-h3 {
-  font-size: 18px;
-}
+        h3 {
+        font-size: 18px;
+        }
 
-h4 {
-  font-size: 16px;
-}
+        h4 {
+        font-size: 16px;
+        }
 
-h5 {
-  font-size: 14px;
-}
+        h5 {
+        font-size: 14px;
+        }
 
-h6 {
-  font-size: 12px;
-}
+        h6 {
+            font-size: 12px;
+        }
 
-a {
-  text-decoration: none;
-  color: #337ab7;
-}
+        a {
+            text-decoration: none;
+            color: #337ab7;
+        }
 
-a:hover {
-  color: #23527c;
-}
+        a:hover {
+            color: #23527c;
+        }
 
-#vpn_status {
-  padding: 20px;
-  background-color: #f7f7f7;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
+        #vpn_status {
+            padding: 20px;
+            background-color: #f7f7f7;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
 
-#vpn_status.active {
-  background-color: #4CAF50;
-  color: #fff;
-}
+        #vpn_status.active {
+            background-color: #4CAF50;
+            color: #fff;
+        }
 
-#vpn_status.inactive {
-  background-color: #ff0000;
-  color: #fff;
-}
+        #vpn_status.inactive {
+            background-color: #ff0000;
+            color: #fff;
+        }
 
-#search-inputs {
-  margin-top: 40px;
-  text-align: center;
-}
+        #search-inputs {
+            margin-top: 40px;
+            text-align: center;
+        }
 
-#search-inputs input[type="text"] {
-  padding: 10px;
-  font-size: 16px;
-  width: 45vw;
-  height: 40px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+        #search-inputs input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 45vw;
+            height: 40px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-#search-inputs button[type="button"] {
-  padding: 10px;
-  font-size: 16px;
-  width: 15%;
-  height: 40px;
-  background-color: #4CAF50;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
+        #search-inputs button[type="button"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 15%;
+            height: 40px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
-#search-inputs button[type="button"]:hover {
-  background-color: #3e8e41;
-}
+        #search-inputs button[type="button"]:hover {
+            background-color: #3e8e41;
+        }
 
-#search-predictions {
-    margin-top: 20px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    max-height: 40vh;
-    max-width: 50vw;
-    margin-left: auto;
-    margin-right: auto;
-}
+        #search-predictions {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: 40vh;
+            max-width: 50vw;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-.search-prediction {
-  padding: 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #ddd;
-}
+        .search-prediction {
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
 
-.search-prediction:hover {
-  background-color: #f0f0f0;
-}
+        .search-prediction:hover {
+            background-color: #f0f0f0;
+        }
 
-.search-prediction img {
-  width: 64px;
-  height: 64px;
-  margin-right: 10px;
-}
+        .search-prediction img {
+            width: 64px;
+            height: 64px;
+            margin-right: 10px;
+        }
 
-#search-engines {
-  margin-top: 40px;
-  text-align: center;
-}
+        #search-engines {
+            margin-top: 40px;
+            text-align: center;
+        }
 
-.search-provider {
-  display: inline-block;
-  margin: 10px;
-  padding: 10px;
-  background-color: #f7f7f7;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-}
+        .search-provider img {
+            width: 64px;
+            height: 64px;
+        }
 
-.search-provider:hover {
-  background-color: #f0f0f0;
-}
+        .search-provider {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px;
+            background-color: #f7f7f7;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .search-provider:hover {
+            background-color: #f0f0f0;
+        }
+
+        .search-provider p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .search-provider[x-is-safe="false"] {
+            background-color: #ff0000;
+            color: #fff;
+        }
 
     </style>
 
@@ -480,12 +495,12 @@ a:hover {
 
     <div id="search-predictions">
         <div class="search-prediction">
-            <img class="prediction-icon" src="https://www.google.com/s2/favicons?sz=256&domain=google.com">
+            <img class="prediction-icon" src="https://www.google.com/s2/favicons?sz=64&domain=google.com">
             <p>Prediction 1</p>
         </div>
 
         <div class="search-prediction">
-            <img class="prediction-icon" src="https://www.google.com/s2/favicons?sz=256&domain=google.com">
+            <img class="prediction-icon" src="https://www.google.com/s2/favicons?sz=64&domain=google.com">
             <p>Prediction 2</p>
         </div>
     </div>
@@ -494,19 +509,28 @@ a:hover {
     <div id="search-engines">
 
         <div class="search-provider" id="duckduckgo" x-url="https://duckduckgo.com/?q=[QUERY]" x-is-safe="true">
-            DuckDuckGo
+            <img src="https://www.google.com/s2/favicons?sz=64&domain=duckduckgo.com">
+            <p>DuckDuckGo</p>
         </div>
 
         <div class="search-provider" id="google" x-url="https://www.google.com/search?q=[QUERY]" x-is-safe="true">
-            Google
+            <img src="https://www.google.com/s2/favicons?sz=64&domain=google.com">
+            <p>Google</p>
         </div>
 
         <div class="search-provider" id="bing" x-url="https://www.bing.com/search?q=[QUERY]" x-is-safe="true">
-            Bing
+            <img src="https://www.google.com/s2/favicons?sz=64&domain=bing.com">
+            <p>Bing</p>
         </div>
 
         <div class="search-provider" id="the_pirate_bay" x-url="https://thepiratebay.org/search/[QUERY]/0/99/0" x-is-safe="false">
-            The Pirate Bay
+            <img src="https://torrindex.net/images/tpb.jpg">
+            <p>The Pirate Bay</p>
+        </div>
+
+        <div class="search-provider" id="repack-games" x-url="https://repack-games.com/?s=[QUERY]" x-is-safe="false">
+            <img src="https://www.google.com/s2/favicons?sz=64&domain=repack-games.com">
+            <p>Repack Games</p>
         </div>
 
 
