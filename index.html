@@ -8,31 +8,47 @@
 <body>
     <script>
 
-        const apps = [ // name, url
-            ["Discord", "https://discord.com/channels/@me"],
-            ["YouTube", "https://www.youtube.com/"],
-            ["YouTube Music", "https://music.youtube.com/"],
+        var t_last_key_input = Date.now();
 
+        const apps = [ // name, url, ?aliases[]
+
+            // Everyday use
+            ["Discord", "https://discord.com/channels/@me"],
+            ["YouTube", "https://www.youtube.com/", ["yt", ]],
+            ["YouTube Music", "https://music.youtube.com/", ["ytms", "music"]],
+
+            // University stuff
             ["studip", "https://studip.uni-rostock.de"],
             ["Uni Email", "https://email.uni-rostock.de"],
             ["Uni lsf", "https://lsf.uni-rostock.de"],
-            ["mail", "https://mail.proton.me/"],
 
+            // Proton programms
+            ["Proton Mail", "https://mail.proton.me/", ["protonmail", "mail"]],
+            ["Proton Calender", "https://calendar.proton.me/", ["protoncalendar", "calendar"]],
+            ["Proton Drive", "https://drive.proton.me/", ["protondrive", "drive"]],
+
+            
+            ["Google Maps", "https://maps.google.com", ["maps"]],
+
+
+            // Development tools
             ["Cloudflare", "https://dash.cloudflare.com/"],
             ["Groq", "https://groq.com/"],
             ["Hetzner Console", "https://console.hetzner.cloud/"],
             ["Wolfram Alpha", "https://www.wolframalpha.com/"],
+            ["Stack Overflow", "https://stackoverflow.com/", ["stackoverflow"]],
             
-
+            // MTG
             ["CardTrader", "https://www.cardtrader.com/"],
             ["Scryfall", "https://Scryfall.com/"],
             ["EDHREC", "https://edhrec.com/"],
             ["Archidekt", "https://archidekt.com/"],
             ["MTGPrint", "https://mtgprint.net/"],
 
+            // Sailing the high seas
             ["1337x", "https://1337x.to/"],
-            ["PirateBay", "https://thepiratebay.org/"],
-            ["Reapck Games", "https://repack-games.com/#"]
+            ["PirateBay", "https://thepiratebay.org/", ["tpb", "The Pirate Bay"]],
+            ["Repack Games", "https://repack-games.com/#"]
         ]
 
         function vpn_is_active() {
@@ -111,20 +127,56 @@
             });
 
             document.getElementById("search").addEventListener("keyup", function(event) {
-                if (event.keyCode === 13) {
-                    // enter key
-                    let query = document.getElementById("search").value;
-                    
-                    let url = search_providers[0].getAttribute("x-url").replace("[QUERY]", query);
+                // ctrl -> open in new tab
+                // shift -> dont search, open the top search prediction
+                
+                let current_time = Date.now();
+                let time_since_last_key_input = current_time - t_last_key_input;
+                t_last_key_input = current_time;
+                console.log(time_since_last_key_input);
 
-                    if (is_url(query)) {
-                        url = query;
+                if (event.keyCode === 13) {
+                    // enter has been pressed
+
+                    let url = "";
+
+                    if (!event.shiftKey) {
+                        let query = document.getElementById("search").value;
+                    
+                        url = search_providers[0].getAttribute("x-url").replace("[QUERY]", query);
+
+                        if (is_url(query)) {
+                            url = query;
+                        }
+                    } else {
+                        let predictions = document.getElementsByClassName("search-prediction");
+                        url = predictions[0].getAttribute("x-url");
                     }
 
-                    window.location.href = url;
-                } else {
-                    update_search_predictions();
+                    if (event.ctrlKey) {
+                        window.open(url, "_blank");
+                    } else {
+                        window.location.href = url;
+                    }
+                } else{
+                    // in X ms, check if the input hasnt changed, if it hasnt, update the search predictions
+                    
+                    let delay = 250;
+
+                    setTimeout(function() {
+                        let new_time = Date.now();
+                        let time_since_last_key_input = new_time - t_last_key_input;
+
+                        if (time_since_last_key_input > delay) {
+                            console.log("updating search predictions");
+                            update_search_predictions();
+                        } else {
+                            console.log("input has changed, not updating search predictions");
+                        }
+                    }, delay);
+
                 }
+                
             });
             
             // set the search bar to focus
@@ -140,13 +192,45 @@
 
             let predictions = [];
 
+            let apps_sorted = []
             for (let i = 0; i < apps.length; i++) {
                 let app = apps[i];
+                
+                let names = []
+                names.push(app[0]);
+                names.push(app[1]);
 
-                if (app[0].toLowerCase().includes(query.toLowerCase()) || app[1].toLowerCase().includes(query.toLowerCase())) {
+                if (app.length > 2) {
+                    names = names.concat(app[2]);
+                }
+
+                let min_distance = 1000;
+                for (let j = 0; j < names.length; j++) {
+                    let name = names[j];
+                    let distance = custom_levenstein_distance(query.toLowerCase(), name.toLowerCase());
+
+                    if (distance < min_distance) {
+                        min_distance = distance;
+                    }
+                }
+
+                apps_sorted.push([app, min_distance]);
+            }
+
+            apps_sorted.sort(function(a, b) {
+                return a[1] - b[1];
+            });
+
+            for (let i = 0; i < apps_sorted.length; i++) {
+                let app = apps_sorted[i][0];
+                let distance = apps_sorted[i][1];
+
+                if (distance < 3) {
                     predictions.push(["Open " + app[0], app[1]]);
                 }
             }
+
+
 
             // add web results
             var url = "/web_autocomplete?q=" + query;
@@ -157,7 +241,8 @@
             for (let i = 0; i < data.length; i++) {
                 let prediction = data[i];
                 let phrase = prediction.phrase;
-                predictions.push(["Search for " + phrase, "https://DuckDuckGo.com/?q=" + phrase]);
+                let url = prediction.url;
+                predictions.push(["Search for " + phrase, url]);
             }
 
             predictions_div.innerHTML = "";
@@ -166,20 +251,68 @@
                 let prediction = predictions[i];
 
                 let prediction_div = document.createElement("div");
+                prediction_div.setAttribute("x-url", prediction[1]);
+
+                let icon = document.createElement("img");
+                icon.src = "https://www.google.com/s2/favicons?sz=256&domain=" + new URL(prediction[1]).hostname;
+                icon.classList.add("prediction-icon");
+                prediction_div.prepend(icon);
+
                 prediction_div.classList.add("search-prediction");
-                prediction_div.innerHTML = prediction[0];
                 prediction_div.addEventListener("click", function() {
-                    window.location.href = prediction[1];
+                    if (event.ctrlKey) {
+                        window.open(prediction[1], "_blank");
+                    } else {
+                        window.location.href = prediction[1];
+                    }
                 });
+
+                let text = document.createElement("p");
+                text.innerHTML = prediction[0];
+                prediction_div.appendChild(text);
 
                 predictions_div.appendChild(prediction_div);
             }
 
         }
 
+        function custom_levenstein_distance(a, b) {
+            // custom levenstein distance that doesnt punish insertions as much
+
+            let weights = [1, 0.2, 0.6]; // deletion, insertion, substitution
+
+            let m = a.length;
+            let n = b.length;
+
+            let dp = new Array(m + 1).fill(0).map(() => new Array(n + 1).fill(0));
+
+            for (let i = 0; i <= m; i++) {
+                for (let j = 0; j <= n; j++) {
+                    if (i == 0) {
+                        dp[i][j] = j;
+                    } else if (j == 0) {
+                        dp[i][j] = i;
+                    } else if (a[i - 1] == b[j - 1]) {
+                        dp[i][j] = dp[i - 1][j - 1];
+                    } else {
+                        dp[i][j] = Math.min(
+                            dp[i - 1][j] + weights[0],
+                            dp[i][j - 1] + weights[1],
+                            dp[i - 1][j - 1] + weights[2]
+                        );
+                    }
+                }
+            }
+
+            return dp[m][n];
+        }
+
+
         document.addEventListener("DOMContentLoaded", function() {
             init_search_providers();
+            update_search_predictions();
             update_vpn_status();
+
         });
 
     </script>
@@ -299,14 +432,20 @@ a:hover {
 
 .search-prediction {
   padding: 10px;
-  margin: 10px;
-  background-color: #f7f7f7;
-  border-bottom: 1px solid #ddd;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
 }
 
 .search-prediction:hover {
   background-color: #f0f0f0;
+}
+
+.search-prediction img {
+  width: 64px;
+  height: 64px;
+  margin-right: 10px;
 }
 
 #search-engines {
@@ -341,11 +480,13 @@ a:hover {
 
     <div id="search-predictions">
         <div class="search-prediction">
-            Prediction 1
+            <img class="prediction-icon" src="https://www.google.com/s2/favicons?sz=256&domain=google.com">
+            <p>Prediction 1</p>
         </div>
 
         <div class="search-prediction">
-            Prediction 2
+            <img class="prediction-icon" src="https://www.google.com/s2/favicons?sz=256&domain=google.com">
+            <p>Prediction 2</p>
         </div>
     </div>
 
