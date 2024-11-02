@@ -133,7 +133,6 @@
                 let current_time = Date.now();
                 let time_since_last_key_input = current_time - t_last_key_input;
                 t_last_key_input = current_time;
-                console.log(time_since_last_key_input);
 
                 if (event.keyCode === 13) {
                     // enter has been pressed
@@ -168,10 +167,7 @@
                         let time_since_last_key_input = new_time - t_last_key_input;
 
                         if (time_since_last_key_input > delay) {
-                            console.log("updating search predictions");
                             update_search_predictions();
-                        } else {
-                            console.log("input has changed, not updating search predictions");
                         }
                     }, delay);
 
@@ -183,7 +179,38 @@
             document.getElementById("search").focus();
         }
 
+        function dom_add_predictions(predictions, predictions_div) {
+                for (let i = 0; i < predictions.length; i++) {
+                    let prediction = predictions[i];
+    
+                    let prediction_div = document.createElement("div");
+                    prediction_div.setAttribute("x-url", prediction[1]);
+    
+                    let icon = document.createElement("img");
+                    icon.src = "https://www.google.com/s2/favicons?sz=64&domain=" + new URL(prediction[1]).hostname;
+                    icon.classList.add("prediction-icon");
+                    prediction_div.prepend(icon);
+    
+                    prediction_div.classList.add("search-prediction");
+                    prediction_div.addEventListener("click", function() {
+                        if (event.ctrlKey) {
+                            window.open(prediction[1], "_blank");
+                        } else {
+                            window.location.href = prediction[1];
+                        }
+                    });
+    
+                    let text = document.createElement("p");
+                    text.innerHTML = prediction[0];
+                    prediction_div.appendChild(text);
+    
+                    predictions_div.appendChild(prediction_div);
+                }
+            }
+
+
         async function update_search_predictions() {
+
             let query = document.getElementById("search").value;
 
             let predictions_div = document.getElementById("search-predictions");
@@ -231,6 +258,14 @@
             }
 
 
+            // add the app predictions to the predictions div before adding the web results
+            // because the web results take some time to load
+            // so this feels a lot more responsive
+            predictions_div.innerHTML = "";
+            dom_add_predictions(predictions, predictions_div);
+            predictions = [];
+
+
 
             // add web results
             var url = "/web_autocomplete?q=" + query;
@@ -245,34 +280,9 @@
                 predictions.push(["Search for " + phrase, url]);
             }
 
-            predictions_div.innerHTML = "";
-
-            for (let i = 0; i < predictions.length; i++) {
-                let prediction = predictions[i];
-
-                let prediction_div = document.createElement("div");
-                prediction_div.setAttribute("x-url", prediction[1]);
-
-                let icon = document.createElement("img");
-                icon.src = "https://www.google.com/s2/favicons?sz=64&domain=" + new URL(prediction[1]).hostname;
-                icon.classList.add("prediction-icon");
-                prediction_div.prepend(icon);
-
-                prediction_div.classList.add("search-prediction");
-                prediction_div.addEventListener("click", function() {
-                    if (event.ctrlKey) {
-                        window.open(prediction[1], "_blank");
-                    } else {
-                        window.location.href = prediction[1];
-                    }
-                });
-
-                let text = document.createElement("p");
-                text.innerHTML = prediction[0];
-                prediction_div.appendChild(text);
-
-                predictions_div.appendChild(prediction_div);
-            }
+            dom_add_predictions(predictions, predictions_div);
+            
+            let t_end = Date.now();
 
         }
 
