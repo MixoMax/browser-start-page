@@ -59,7 +59,7 @@
             xhr.send();
             ip = xhr.responseText;
 
-            xhr.open("GET", "/is_vpn?ip=" + ip, false);
+            xhr.open("GET", "https://search.linush.org/is_vpn?ip=" + ip, false);
             xhr.send();
             let data = JSON.parse(xhr.responseText);
 
@@ -268,7 +268,7 @@
 
 
             // add web results
-            var url = "/web_autocomplete?q=" + query;
+            var url = "https://search.linush.org/web_autocomplete?q=" + query;
 
             let response = await fetch(url);
             let data = await response.json();
