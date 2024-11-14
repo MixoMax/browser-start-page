@@ -182,7 +182,7 @@ def autocomplete_wikipedia(q: str) -> list[dict[str, str]]:
 
     print(f"Wikipedia took {(time.time() - t_start) * 1000:.2f} milliseconds")
 
-    return [{"phrase": item["title"], "url": f"https://en.wikipedia.org/wiki/{item['title']}"} for item in data["pages"]]
+    return [{"phrase": item["title"], "url": f"https://en.wikipedia.org/wiki/{item['title']}"} for item in data.get("pages", [])]
 
 def google_search(q: str) -> list[dict[str, str]]:
     t_start = time.time()
