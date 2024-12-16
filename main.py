@@ -119,8 +119,19 @@ def get_random_header():
 
 @app.get("/", response_class=FileResponse)
 async def read_root(request: Request):
-
     return FileResponse("index.html")
+
+@app.get("/weather.html", response_class=FileResponse)
+async def read_weather(request: Request):
+    return FileResponse("weather.html")
+    
+
+@app.get("/favicon.ico", response_class=FileResponse)
+async def read_favicon(request: Request):    
+    return FileResponse("favicon.ico")
+
+
+
 
 @app.get("/is_vpn", response_class=JSONResponse)
 async def is_vpn(ip: str):
