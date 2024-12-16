@@ -457,7 +457,17 @@
 
         document.getElementById('city').addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
-                window.location.href = `weather.html?city=${document.getElementById('city').value}&country=${document.getElementById('country').value}`;
+                var city_val = document.getElementById('city').value;
+                var country_val = document.getElementById('country').value;
+
+                // if "," is in the city name, split it into city and country
+                if (city_val.includes(",")) {
+                    var city_country = city_val.split(",");
+                    city_val = city_country[0];
+                    country_val = city_country[1];
+                }
+                
+                window.location.href = `weather.html?city=${city_val}&country=${country_val}`;
             }
         });
 
