@@ -18,6 +18,7 @@ import time
 import asyncio
 import ctypes
 import random
+import sys
 
 
 app = FastAPI()
@@ -283,4 +284,10 @@ async def web_autocomplete(q: str):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    argv = sys.argv
+    if len(argv) > 1:
+        port = int(argv[1])
+    else:
+        port = 8001
+    print(f"Starting server on port {port}")
+    uvicorn.run(app, host="0.0.0.0", port=port)
